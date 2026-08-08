@@ -38,7 +38,7 @@ export default function PaymentSuccessPage() {
         } else {
           found.used = true;
           localStorage.setItem("active_pro_codes", JSON.stringify(savedCodes));
-          localStorage.setItem("is_pro_user", "true");
+          localStorage.setItem("is_pro_user", "true"); // PRO স্ট্যাটাস পার্মানেন্টলি সেভ হলো
           
           setActivateStatus({ success: true, message: "অভিনন্দন! আপনার অ্যাকাউন্ট সফলভাবে PRO-তে উন্নীত হয়েছে!" });
           
@@ -94,7 +94,7 @@ export default function PaymentSuccessPage() {
           </div>
         </div>
 
-        {/* Code Input & Activation Section (Only Input Field) */}
+        {/* Code Input & Activation Section */}
         <div className="bg-gradient-to-r from-indigo-950/50 to-purple-950/50 border border-indigo-500/20 rounded-2xl p-5 space-y-4">
           <div className="flex items-center gap-2 text-indigo-300 text-xs font-bold uppercase tracking-wider">
             <Mail size={16} /> Check your Gmail and enter the code below

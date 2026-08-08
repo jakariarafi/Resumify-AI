@@ -15,7 +15,6 @@ export default function CTA() {
 
           <div className="relative z-10 max-w-3xl mx-auto space-y-6">
             
-
             <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
               Stop Losing Interviews to <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400">Poorly Formatted Resumes</span>
             </h2>
@@ -26,7 +25,7 @@ export default function CTA() {
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/register"
+                href="/dashboard/resume"
                 className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-base shadow-xl hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
               >
                 <span>Build My Resume Now</span>

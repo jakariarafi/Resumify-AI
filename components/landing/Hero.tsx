@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2, ShieldCheck, Zap, Sparkles } from "lucide-react";
 
 const typewriterTexts = [
@@ -12,6 +13,7 @@ const typewriterTexts = [
 ];
 
 export default function Hero() {
+  const router = useRouter();
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [currentDisplayText, setCurrentDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -49,6 +51,12 @@ export default function Hero() {
     }
   };
 
+  // বাটন ক্লিক করলেই সরাসরি রেজ্যুম এডিট পেজে নিয়ে যাবে
+  const handleCreateResume = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    router.push("/dashboard/resume");
+  };
+
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden bg-gradient-to-b from-white via-indigo-50/40 to-white">
       {/* Background Glowing & Animated Elements */}
@@ -61,7 +69,7 @@ export default function Hero() {
           Build an <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 animate-gradient">ATS-Optimized Resume</span> in Minutes.
         </h1>
 
-        {/* Fast Dynamic Typewriter Subtitle (No Underline) */}
+        {/* Fast Dynamic Typewriter Subtitle */}
         <div className="mt-6 text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-normal h-12 flex items-center justify-center">
           <span>Transform your career with&nbsp;</span>
           <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
@@ -72,13 +80,13 @@ export default function Hero() {
 
         {/* CTA Buttons with Smooth Hover Effects */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            href="/dashboard/resume"
-            className="w-full sm:w-auto group flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 text-white font-bold text-base shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300"
+          <button
+            onClick={handleCreateResume}
+            className="w-full sm:w-auto group flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 text-white font-bold text-base shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer"
           >
             <span>Create Your Resume Free</span>
             <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-          </Link>
+          </button>
 
           <a
             href="#templates"
@@ -125,7 +133,7 @@ export default function Hero() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-gray-900/90 border border-gray-800 p-5 rounded-xl transition hover:border-indigo-500/50">
                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">1. Personal Info</h4>
-                <p className="text-sm font-semibold mt-2 text-gray-200">Alex Jobayed Rafi</p>
+                <p className="text-sm font-semibold mt-2 text-gray-200">Al Jakaria Hossain Jobayed Rafi</p>
                 <p className="text-xs text-indigo-400 mt-0.5 font-medium">Software Engineer</p>
               </div>
               <div className="bg-gray-900/90 border border-gray-800 p-5 rounded-xl transition hover:border-indigo-500/50">

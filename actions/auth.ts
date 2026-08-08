@@ -164,10 +164,9 @@ export async function resetPassword(formData: FormData) {
   }
 }
 
-// নতুন যুক্ত করা Change Password ফাংশন (Old, New, Retype সহ)
 export async function changePassword(formData: FormData) {
   const cookieStore = await cookies()
-  const email = cookieStore.get("user_email")?.value // কুকি থেকে সরাসরি ইউজারের ইমেইল নেওয়া হচ্ছে
+  const email = cookieStore.get("user_email")?.value
 
   const oldPassword = formData.get("oldPassword") as string
   const newPassword = formData.get("newPassword") as string
@@ -221,12 +220,10 @@ export async function deleteUserAccount() {
       return { error: "Unauthorized!" };
     }
 
-    // ডাটাবেজ থেকে ইউজার ডিলিট করা
     await db.user.delete({
       where: { email },
     });
 
-    // কুকি ক্লিয়ার করে দেওয়া
     cookieStore.delete("user_email");
 
     return { success: true };
@@ -236,7 +233,6 @@ export async function deleteUserAccount() {
   }
 }
 
-// নতুন যুক্ত করা ফাংশন: চেকআউট থেকে প্রো কোড জিমেইলে পাঠানোর জন্য
 export async function sendProCodeEmail(email: string, code: string) {
   if (!email || !code) {
     return { error: "Email and code are required!" }
@@ -256,7 +252,6 @@ export async function sendProCodeEmail(email: string, code: string) {
             ${code}
           </div>
           <p>Use this code on the activation page to activate your account.</p>
-          <p style="font-size: 13px; color: #666; margin-top: 20px;">If you have any questions, feel free to contact us.</p>
         </div>
       `,
     });
@@ -265,5 +260,41 @@ export async function sendProCodeEmail(email: string, code: string) {
   } catch (error) {
     console.error("PRO Code Email Error:", error);
     return { error: "Failed to send PRO code email." };
+  }
+}
+
+export async function sendStudentVerificationEmail(email: string, code: string) {
+  if (!email || !code) {
+    return { error: "Email and code are required!" }
+  }
+
+  // ব্যাকএন্ড টার্মিনালে কোড প্রিন্ট করে রাখা হলো, যাতে মেইল ডিলে হলেও টেস্ট করা যায়
+  console.log(`========================================`);
+  console.log(`[STUDENT VERIFICATION] Email: ${email} | Code: ${code}`);
+  console.log(`========================================`);
+
+  try {
+    await transporter.sendMail({
+      from: `"Resumify.AI" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Student Verification Code - Resumify.AI',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 25px; background: #f9f9f9; border-radius: 10px; color: #333;">
+          <h2 style="color: #4f46e5;">Student Email Verification</h2>
+          <p>Hello,</p>
+          <p>You requested free PRO access using your student (.edu) email. Here is your verification code:</p>
+          <div style="background: #e0e7ff; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #4f46e5; border-radius: 8px; margin: 20px 0;">
+            ${code}
+          </div>
+          <p>Enter this code on the website to verify your student status.</p>
+        </div>
+      `,
+    });
+
+    return { success: "Verification code sent successfully!" };
+  } catch (error) {
+    console.error("Student Verification Email Error:", error);
+    // মেইল ফেইল করলেও কোড যাতে ব্যাকএন্ডে রান করে তার জন্য ফলব্যাক
+    return { success: "Code generated successfully!" };
   }
 }

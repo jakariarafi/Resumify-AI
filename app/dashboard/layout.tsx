@@ -1,26 +1,28 @@
 import { db } from "@/lib/db";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const userEmailCookie = cookieStore.get("user_email")?.value;
 
-  if (!userEmailCookie) {
-    redirect("/login");
+  let currentUserName = "Guest User";
+  let currentUserEmail = "guest@example.com";
+
+  if (userEmailCookie) {
+    try {
+      const user = await db.user.findUnique({
+        where: { email: userEmailCookie },
+      });
+
+      if (user) {
+        currentUserName = user.name || "User";
+        currentUserEmail = user.email;
+      }
+    } catch (error) {
+      console.error("Database fetch error:", error);
+    }
   }
-
-  const user = await db.user.findUnique({
-    where: { email: userEmailCookie },
-  });
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const currentUserName = user.name || "User";
-  const currentUserEmail = user.email;
 
   const getInitials = (name: string) => {
     if (!name) return "U";
