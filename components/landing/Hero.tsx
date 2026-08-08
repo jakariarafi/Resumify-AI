@@ -73,7 +73,7 @@ export default function Hero() {
         {/* CTA Buttons with Smooth Hover Effects */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            href="/register"
+            href="/dashboard/resume"
             className="w-full sm:w-auto group flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 text-white font-bold text-base shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300"
           >
             <span>Create Your Resume Free</span>

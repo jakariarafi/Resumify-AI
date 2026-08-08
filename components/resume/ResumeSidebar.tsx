@@ -1,128 +1,102 @@
 "use client";
 
-import {
-  User,
-  GraduationCap,
-  Briefcase,
-  Code2,
-  FolderKanban,
-  Award,
-  Languages,
-  Users,
-} from "lucide-react";
+import { Check } from "lucide-react";
 
 interface ResumeSidebarProps {
-  active: string;
-  setActive: (section: string) => void;
+  currentStep: number;
+  setStep: (step: number) => void;
+  completeness: number;
 }
 
-const sections = [
-  {
-    id: "personal",
-    title: "Personal Info",
-    icon: User,
-  },
-  {
-    id: "education",
-    title: "Education",
-    icon: GraduationCap,
-  },
-  {
-    id: "experience",
-    title: "Experience",
-    icon: Briefcase,
-  },
-  {
-    id: "skills",
-    title: "Skills",
-    icon: Code2,
-  },
-  {
-    id: "projects",
-    title: "Projects",
-    icon: FolderKanban,
-  },
-  {
-    id: "certificates",
-    title: "Certificates",
-    icon: Award,
-  },
-  {
-    id: "languages",
-    title: "Languages",
-    icon: Languages,
-  },
-  {
-    id: "references",
-    title: "References",
-    icon: Users,
-  },
+const steps = [
+  { id: 1, label: "Heading" },
+  { id: 2, label: "Education" },
+  { id: 3, label: "Experience" },
+  { id: 4, label: "Skills" },
+  { id: 5, label: "Summary" },
+  { id: 6, label: "Finalize" },
 ];
 
-export default function ResumeSidebar({
-  active,
-  setActive,
-}: ResumeSidebarProps) {
+export default function ResumeSidebar({ currentStep, setStep, completeness }: ResumeSidebarProps) {
   return (
-    <div className="flex h-full flex-col bg-white">
+    <aside className="w-72 bg-[#06182c] text-white flex flex-col justify-between p-6 shrink-0 h-full select-none border-r border-slate-800 shadow-xl">
+      
+      {/* Steps List with Dashed Line Animation */}
+      <div className="space-y-6 pt-4">
+        <div className="flex flex-col space-y-6 relative">
+          
+          {/* Vertical Background Dashed Line */}
+          <div className="absolute left-[15px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-slate-700/60 z-0" />
 
-      {/* Header */}
-      <div className="border-b p-6">
-        <h2 className="text-xl font-bold text-slate-800">
-          Resume Builder
-        </h2>
+          {steps.map((item, index) => {
+            const isActive = currentStep === item.id;
+            const isCompleted = currentStep > item.id;
 
-        <p className="mt-1 text-sm text-slate-500">
-          Complete every section.
-        </p>
-      </div>
+            return (
+              <button
+                key={item.id}
+                onClick={() => setStep(item.id)}
+                className="flex items-center gap-4 text-left relative z-10 w-full group cursor-pointer transition-all duration-300"
+              >
+                {/* Step Circle with Pulse & Glow Animation */}
+                <div 
+                  className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-500 relative ${
+                    isActive 
+                      ? "bg-amber-400 text-slate-900 ring-4 ring-amber-400/20 scale-110 shadow-lg shadow-amber-400/20" 
+                      : isCompleted 
+                      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" 
+                      : "bg-[#112a46] text-slate-400 group-hover:bg-[#1a3a5f] group-hover:text-white"
+                  }`}
+                >
+                  {isCompleted ? <Check size={14} className="stroke-[3]" /> : item.id}
+                  
+                  {/* Active Ripple Animation Effect */}
+                  {isActive && (
+                    <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-35 pointer-events-none" />
+                  )}
+                </div>
 
-      {/* Menu */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {/* Step Label with Hover Transition */}
+                <span className={`text-sm font-semibold tracking-wide transition-all duration-300 ${
+                  isActive 
+                    ? "text-white font-bold translate-x-1" 
+                    : isCompleted 
+                    ? "text-slate-300" 
+                    : "text-slate-400 group-hover:text-slate-200"
+                }`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
-        {sections.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActive(item.id)}
-              className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 cursor-pointer
-                ${
-                  active === item.id
-                    ? "bg-indigo-600 text-white shadow-lg"
-                    : "text-slate-600 hover:bg-slate-100"
-                }
-              `}
-            >
-              <Icon size={20} />
-
-              <span className="font-medium">
-                {item.title}
-              </span>
-            </button>
-          );
-        })}
-
-      </div>
-
-      {/* Footer */}
-      <div className="border-t p-5">
-        <div className="rounded-xl bg-indigo-50 p-4">
-          <h3 className="font-semibold text-indigo-700">
-            Resume Progress
-          </h3>
-
-          <div className="mt-3 h-2 w-full rounded-full bg-indigo-100">
-            <div className="h-2 w-1/4 rounded-full bg-indigo-600"></div>
+        {/* Resume Completeness Bar with Smooth Transition */}
+        <div className="pt-8 border-t border-slate-800/80 space-y-2.5">
+          <div className="flex justify-between text-[11px] font-bold tracking-wider text-slate-400">
+            <span>RESUME COMPLETENESS:</span>
+            <span className="text-amber-400 font-extrabold">{completeness}%</span>
           </div>
-
-          <p className="mt-2 text-xs text-slate-500">
-            25% Completed
-          </p>
+          <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div 
+              className="bg-amber-400 h-full transition-all duration-700 ease-out rounded-full shadow-sm shadow-amber-400/50"
+              style={{ width: `${completeness}%` }}
+            />
+          </div>
         </div>
       </div>
 
-    </div>
+      {/* Footer Links */}
+      <div className="text-[11px] text-slate-400 space-y-3 pt-6 border-t border-slate-800/80">
+        <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-slate-400">
+          <a href="#" className="hover:underline hover:text-white transition">Terms & Conditions</a>
+          <a href="#" className="hover:underline hover:text-white transition">Privacy Policy</a>
+          <a href="#" className="hover:underline hover:text-white transition">Accessibility</a>
+          <a href="#" className="hover:underline hover:text-white transition">Contact Us</a>
+        </div>
+        <p className="text-slate-500 text-[10px] pt-1">© 2026, Bold Limited. All rights reserved.</p>
+      </div>
+
+    </aside>
   );
 }

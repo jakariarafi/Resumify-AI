@@ -167,7 +167,7 @@ export async function resetPassword(formData: FormData) {
 // নতুন যুক্ত করা Change Password ফাংশন (Old, New, Retype সহ)
 export async function changePassword(formData: FormData) {
   const cookieStore = await cookies()
-  const email = cookieStore.get("user_email")?.value // কুকি থেকে সরাসরি ইউজারের ইমেইল নেওয়া হচ্ছে
+  const email = cookieStore.get("user_email")?.value // কুকি থেকে সরাসরি ইউজারের ইমেইল নেওয়া হচ্ছে
 
   const oldPassword = formData.get("oldPassword") as string
   const newPassword = formData.get("newPassword") as string
@@ -211,6 +211,7 @@ export async function changePassword(formData: FormData) {
     return { error: "Something went wrong, please try again." }
   }
 }
+
 export async function deleteUserAccount() {
   try {
     const cookieStore = await cookies();
@@ -225,12 +226,44 @@ export async function deleteUserAccount() {
       where: { email },
     });
 
-    // কুকি ক্লিয়ার করে দেওয়া
+    // কুকি ক্লিয়ার করে দেওয়া
     cookieStore.delete("user_email");
 
     return { success: true };
   } catch (error) {
     console.error("Delete Account Error:", error);
     return { error: "Failed to delete account!" };
+  }
+}
+
+// নতুন যুক্ত করা ফাংশন: চেকআউট থেকে প্রো কোড জিমেইলে পাঠানোর জন্য
+export async function sendProCodeEmail(email: string, code: string) {
+  if (!email || !code) {
+    return { error: "Email and code are required!" }
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"Resumify.AI" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Your PRO Account Activation Code - Resumify.AI',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 25px; background: #f9f9f9; border-radius: 10px; color: #333;">
+          <h2 style="color: #4f46e5;">Your PRO Access is Unlocked!</h2>
+          <p>Hello,</p>
+          <p>Thank you for your payment. Here is your unique activation code to unlock lifetime PRO access:</p>
+          <div style="background: #e0e7ff; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #4f46e5; border-radius: 8px; margin: 20px 0;">
+            ${code}
+          </div>
+          <p>Use this code on the activation page to activate your account.</p>
+          <p style="font-size: 13px; color: #666; margin-top: 20px;">If you have any questions, feel free to contact us.</p>
+        </div>
+      `,
+    });
+
+    return { success: "PRO code sent successfully!" };
+  } catch (error) {
+    console.error("PRO Code Email Error:", error);
+    return { error: "Failed to send PRO code email." };
   }
 }

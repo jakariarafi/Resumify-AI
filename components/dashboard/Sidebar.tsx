@@ -34,7 +34,7 @@ export default function Sidebar({
 
   const menuItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "My Resumes", href: "/dashboard/resumes", icon: FileText },
+    { name: "My Resumes", href: "/dashboard/resume", icon: FileText },
     { name: "AI Builder", href: "/dashboard/builder", icon: Sparkles },
     { name: "Profile", href: "/dashboard/profile", icon: User },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
@@ -100,7 +100,7 @@ export default function Sidebar({
             })}
           </nav>
 
-          {/* ড্যাশবোর্ড থেকে ল্যান্ডিং পেজে যাওয়ার জন্য Back to Home বাটন */}
+          
           <div className="mt-4 pt-4 border-t border-white/10">
             <Link
               href="/"

@@ -31,6 +31,7 @@ interface ResumePreviewProps {
   accentColor?: string;
   layoutSettings?: any;
   textSettings?: any;
+  pageNumber?: number; // মাল্টি-পেজ ট্র্যাকিংয়ের জন্য
 }
 
 export default function ResumePreview({
@@ -68,10 +69,10 @@ export default function ResumePreview({
     secondaryHeadingWeight: "bold",
     bodyWeight: "normal",
     sectionTitleWeight: "600",
-  }
+  },
+  pageNumber = 1
 }: ResumePreviewProps) {
   
-  // অ্যাডমিন কনফিগ থেকে সিলেক্ট করা টেমপ্লেটের লেআউট টাইপ বের করা (যেমন: two-column বা modern-left)
   const currentConfig = templatesConfig.find((t) => t.id === template) || templatesConfig[0];
   const layoutType = currentConfig?.layoutType || "classic-centered";
 
@@ -89,18 +90,19 @@ export default function ResumePreview({
   const colors = getColorClasses();
   const displayName = personalInfo?.fullName || `${personalInfo?.firstName || ""} ${personalInfo?.lastName || ""}`.trim() || "Your Name";
 
-  const headerAlignClass = 
-    layoutSettings.headerAlignment === "center" ? "text-center items-center" :
-    layoutSettings.headerAlignment === "right" ? "text-right items-end" : "text-left items-start";
+  const alignment = layoutSettings.headerAlignment || "left";
+  const contactJustifyClass = 
+    alignment === "center" ? "justify-center" :
+    alignment === "right" ? "justify-end" : "justify-start";
 
   const dateAlignClass = layoutSettings.dateAlignment === "left" ? "order-first" : "order-last";
-  const locationAlignClass = layoutSettings.locationAlignment === "right" ? "ml-auto text-right" : "mr-auto text-left";
 
   return (
     <div 
-      className="w-full h-full bg-white text-slate-800"
+      className="w-full bg-white text-slate-800 box-border"
       style={{ 
         fontFamily: `'${secondaryFont}', sans-serif`,
+        minHeight: "297mm", // ফিক্সড হাইটের বদলে minHeight ব্যবহার করা হয়েছে যাতে লেখা বাড়লে পেজ অটো বড় হয় বা প্রিন্টের সময় ঠিক থাকে
         paddingTop: `${layoutSettings.topBottom}in`,
         paddingBottom: `${layoutSettings.topBottom}in`,
         paddingLeft: `${layoutSettings.leftRight}in`,
@@ -109,27 +111,30 @@ export default function ResumePreview({
       }}
     >
       
-      {/* টেমপ্লেট টাইপ অনুযায়ী লেআউট পরিবর্তন (যেমন: Two-Column হলে গ্রিড স্টাইল, না হলে স্ট্যান্ডার্ড) */}
       {layoutType === "two-column" ? (
-        <div className="grid grid-cols-3 gap-6 h-full">
+        <div className="grid grid-cols-3 gap-6">
           {/* বাম কলাম */}
           <div className="col-span-1 bg-slate-50 p-3 rounded-xl border-r border-slate-200 space-y-4">
-            {personalInfo?.photo && (
+            {pageNumber === 1 && personalInfo?.photo && (
               <div className={`w-16 h-16 rounded-xl overflow-hidden border-2 ${colors.border} shrink-0 shadow-sm mx-auto`}>
                 <img src={personalInfo.photo} alt="Profile" className="w-full h-full object-cover" />
               </div>
             )}
-            <h1 className="text-slate-900 tracking-tight font-bold" style={{ fontFamily: `'${primaryFont}', sans-serif`, fontSize: `${textSettings.primaryHeadingSize * 0.8}pt` }}>
-              {displayName}
-            </h1>
-            <p className={`uppercase tracking-widest ${colors.text} font-semibold`} style={{ fontSize: `${textSettings.secondaryHeadingSize * 0.8}pt` }}>
-              {personalInfo?.profession || "Profession"}
-            </p>
-            <div className="text-[10px] space-y-1 text-slate-600">
-              {personalInfo?.email && <p>{personalInfo.email}</p>}
-              {personalInfo?.phone && <p>{personalInfo.phone}</p>}
-              {personalInfo?.location && <p>{personalInfo.location}</p>}
-            </div>
+            {pageNumber === 1 && (
+              <>
+                <h1 className="text-slate-900 tracking-tight font-bold" style={{ fontFamily: `'${primaryFont}', sans-serif`, fontSize: `${textSettings.primaryHeadingSize * 0.8}pt` }}>
+                  {displayName}
+                </h1>
+                <p className={`uppercase tracking-widest ${colors.text} font-semibold`} style={{ fontSize: `${textSettings.secondaryHeadingSize * 0.8}pt` }}>
+                  {personalInfo?.profession || "Profession"}
+                </p>
+                <div className="text-[10px] space-y-1 text-slate-600">
+                  {personalInfo?.email && <p>{personalInfo.email}</p>}
+                  {personalInfo?.phone && <p>{personalInfo.phone}</p>}
+                  {personalInfo?.location && <p>{personalInfo.location}</p>}
+                </div>
+              </>
+            )}
 
             {skills && skills.length > 0 && (
               <div>
@@ -147,7 +152,7 @@ export default function ResumePreview({
 
           {/* ডান কলাম */}
           <div className="col-span-2 space-y-4">
-            {personalInfo?.summary && (
+            {pageNumber === 1 && personalInfo?.summary && (
               <section>
                 <h2 className={`uppercase tracking-wider border-b pb-1 font-bold ${colors.text} ${colors.border}`} style={{ fontSize: `${textSettings.sectionTitleSize}pt` }}>Summary</h2>
                 <p className="text-slate-700 leading-relaxed mt-1" style={{ fontSize: `${textSettings.bodySize}pt` }}>{personalInfo.summary}</p>
@@ -173,59 +178,68 @@ export default function ResumePreview({
           </div>
         </div>
       ) : (
-        /* আপনার অরিজিনাল স্ট্যান্ডার্ড লেআউট ও সেকশনগুলো (Header ATS, Essential, Polished ইত্যাদি) */
+        /* স্ট্যান্ডার্ড লেআউট */
         <>
-          {/* Header Section */}
-          <div 
-            className={`pb-6 border-b-2 flex flex-col ${headerAlignClass} gap-4 ${colors.border}`}
-            style={{ marginBottom: `${layoutSettings.betweenSections}pt` }}
-          >
-            {personalInfo?.photo && (
-              <div className={`w-20 h-20 rounded-2xl overflow-hidden border-2 ${colors.border} shrink-0 shadow-sm`}>
-                <img src={personalInfo.photo} alt="Profile" className="w-full h-full object-cover" />
+          {/* Header Section (শুধুমাত্র Page 1 এ দেখাবে) */}
+          {pageNumber === 1 && (
+            <div 
+              className={`pb-6 border-b-2 flex ${
+                alignment === "center" ? "flex-col items-center text-center" : 
+                alignment === "right" ? "flex-row-reverse justify-between text-right items-center" : 
+                "flex-row justify-between text-left items-center"
+              } gap-4 ${colors.border}`}
+              style={{ marginBottom: `${layoutSettings.betweenSections}pt` }}
+            >
+              <div className={`space-y-1 w-full flex flex-col ${
+                alignment === "center" ? "items-center text-center" : 
+                alignment === "right" ? "items-end text-right" : "items-start text-left"
+              }`}>
+                <h1 
+                  className="text-slate-900 tracking-tight"
+                  style={{ 
+                    fontFamily: `'${primaryFont}', sans-serif`,
+                    fontSize: `${textSettings.primaryHeadingSize}pt`,
+                    fontWeight: textSettings.primaryHeadingWeight
+                  }}
+                >
+                  {displayName}
+                </h1>
+                <p 
+                  className={`uppercase tracking-widest ${colors.text}`}
+                  style={{ 
+                    fontFamily: `'${secondaryFont}', sans-serif`,
+                    fontSize: `${textSettings.secondaryHeadingSize}pt`,
+                    fontWeight: textSettings.secondaryHeadingWeight
+                  }}
+                >
+                  {personalInfo?.profession || "Profession / Job Title"}
+                </p>
+                
+                <div 
+                  className={`flex flex-wrap gap-x-3 gap-y-1 text-slate-600 pt-1 font-medium w-full ${contactJustifyClass}`}
+                  style={{ fontSize: `${textSettings.bodySize}pt` }}
+                >
+                  {personalInfo?.email && <span>{personalInfo.email}</span>}
+                  {personalInfo?.phone && <span>• {personalInfo.phone}</span>}
+                  {(personalInfo?.location || personalInfo?.address) && (
+                    <span>• {personalInfo.location || personalInfo.address}</span>
+                  )}
+                  {personalInfo?.website && <span>• {personalInfo.website}</span>}
+                  {personalInfo?.linkedin && <span>• {personalInfo.linkedin}</span>}
+                  {personalInfo?.github && <span>• {personalInfo.github}</span>}
+                </div>
               </div>
-            )}
 
-            <div className={`space-y-1.5 w-full ${headerAlignClass}`}>
-              <h1 
-                className="text-slate-900 tracking-tight"
-                style={{ 
-                  fontFamily: `'${primaryFont}', sans-serif`,
-                  fontSize: `${textSettings.primaryHeadingSize}pt`,
-                  fontWeight: textSettings.primaryHeadingWeight
-                }}
-              >
-                {displayName}
-              </h1>
-              <p 
-                className={`uppercase tracking-widest ${colors.text}`}
-                style={{ 
-                  fontFamily: `'${secondaryFont}', sans-serif`,
-                  fontSize: `${textSettings.secondaryHeadingSize}pt`,
-                  fontWeight: textSettings.secondaryHeadingWeight
-                }}
-              >
-                {personalInfo?.profession || "Profession / Job Title"}
-              </p>
-              
-              <div 
-                className={`flex flex-wrap gap-x-3 gap-y-1 text-slate-600 pt-1 font-medium justify-${layoutSettings.headerAlignment === "center" ? "center" : layoutSettings.headerAlignment === "right" ? "end" : "start"}`}
-                style={{ fontSize: `${textSettings.bodySize}pt` }}
-              >
-                {personalInfo?.email && <span>{personalInfo.email}</span>}
-                {personalInfo?.phone && <span>• {personalInfo.phone}</span>}
-                {(personalInfo?.location || personalInfo?.address) && (
-                  <span className={locationAlignClass}>• {personalInfo.location || personalInfo.address}</span>
-                )}
-                {personalInfo?.website && <span>• {personalInfo.website}</span>}
-                {personalInfo?.linkedin && <span>• {personalInfo.linkedin}</span>}
-                {personalInfo?.github && <span>• {personalInfo.github}</span>}
-              </div>
+              {personalInfo?.photo && (
+                <div className={`w-20 h-20 rounded-2xl overflow-hidden border-2 ${colors.border} shrink-0 shadow-sm`}>
+                  <img src={personalInfo.photo} alt="Profile" className="w-full h-full object-cover" />
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
-          {/* Summary */}
-          {personalInfo?.summary && (
+          {/* Summary (Page 1) */}
+          {pageNumber === 1 && personalInfo?.summary && (
             <section style={{ marginBottom: `${layoutSettings.betweenSections}pt` }}>
               <h2 
                 className={`uppercase tracking-wider border-b pb-1 ${colors.text} ${colors.border}`}
@@ -302,27 +316,15 @@ export default function ResumePreview({
 
                   return (
                     <div key={i}>
-                      {layoutSettings.educationLayout === "inline" ? (
-                        <div className="flex justify-between items-baseline">
-                          <h3 className="text-slate-900" style={{ fontSize: `${textSettings.secondaryHeadingSize}pt`, fontWeight: textSettings.secondaryHeadingWeight }}>
-                            {primaryTitle} {secondaryTitle ? <span className="font-normal text-slate-600">({secondaryTitle})</span> : ""}
-                          </h3>
-                          <span className={`text-slate-500 ${dateAlignClass}`} style={{ fontSize: `${textSettings.bodySize - 1}pt` }}>
-                            {edu.startDate} - {edu.endDate}
-                          </span>
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="flex justify-between items-baseline">
-                            <h3 className="text-slate-900" style={{ fontSize: `${textSettings.secondaryHeadingSize}pt`, fontWeight: textSettings.secondaryHeadingWeight }}>{primaryTitle}</h3>
-                            <span className={`text-slate-500 ${dateAlignClass}`} style={{ fontSize: `${textSettings.bodySize - 1}pt` }}>
-                              {edu.startDate} - {edu.endDate}
-                            </span>
-                          </div>
-                          {secondaryTitle && <p className="text-slate-600 font-medium" style={{ fontSize: `${textSettings.bodySize}pt` }}>{secondaryTitle}</p>}
-                        </div>
-                      )}
-
+                      <div className="flex justify-between items-baseline">
+                        <h3 className="text-slate-900" style={{ fontSize: `${textSettings.secondaryHeadingSize}pt`, fontWeight: textSettings.secondaryHeadingWeight }}>
+                          {primaryTitle}
+                        </h3>
+                        <span className={`text-slate-500 ${dateAlignClass}`} style={{ fontSize: `${textSettings.bodySize - 1}pt` }}>
+                          {edu.startDate} - {edu.endDate}
+                        </span>
+                      </div>
+                      {secondaryTitle && <p className="text-slate-600 font-medium" style={{ fontSize: `${textSettings.bodySize}pt` }}>{secondaryTitle}</p>}
                       <div className="flex gap-3 text-slate-500 mt-0.5" style={{ fontSize: `${textSettings.bodySize - 1}pt` }}>
                         {edu.location && <span>{edu.location}</span>}
                         {edu.cgpa && <span>• CGPA/GPA: {edu.cgpa}</span>}
